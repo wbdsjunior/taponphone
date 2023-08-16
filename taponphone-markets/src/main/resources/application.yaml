@@ -1,0 +1,37 @@
+management:
+  defaults:
+    metrics:
+      export:
+        enabled: false
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+server:
+  error:
+    whitelabel:
+      enabled: false
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://taponphone-markets-postgres:5432/taponphone-markets
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+        ddl-auto: update
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+springdoc:
+  packages-to-scan: io.github.wbdsjunior.taponphone.markets.controllers

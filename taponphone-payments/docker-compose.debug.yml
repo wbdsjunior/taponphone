@@ -1,0 +1,44 @@
+version: '3.4'
+services:
+  taponphone-payments:
+    depends_on:
+      - taponphone-payments-mongo
+      # taponphone-payments-mongo:
+      #   condition: service_healthy
+    image: taponphone-payments
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=50052,quiet=y
+    ports:
+      - 8082:8082
+      - 50052:50052
+    networks:
+      - taponphone-payments
+    healthcheck:
+      test: curl --fail --silent localhost:8082/actuator/health/readiness | grep UP || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  taponphone-payments-mongo:
+    image: mongo:6
+    environment:
+      - MONGO_INITDB_DATABASE=taponphone-payments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+      - 27017:27017
+    volumes:
+      - taponphone-payments-mongo:/data/db
+    networks:
+      - taponphone-payments
+    # healthcheck:
+    #   test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+volumes:
+  taponphone-payments-mongo:
+networks:
+  taponphone-payments:

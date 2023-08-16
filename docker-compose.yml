@@ -1,0 +1,79 @@
+version: '3.4'
+services:
+  taponphone-markets:
+    depends_on:
+      taponphone-markets-postgres:
+        condition: service_healthy
+    image: taponphone-markets
+    build:
+      context: ./taponphone-markets
+      dockerfile: ./Dockerfile
+    ports:
+      - 8081:8081
+      - 50051:50051
+    networks:
+      - taponphone-markets
+    healthcheck:
+      test: curl --fail --silent localhost:8081/actuator/health/readiness | grep UP || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  taponphone-markets-postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=taponphone-markets
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - taponphone-markets-postgres:/var/lib/postgresql
+    networks:
+      - taponphone-markets
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  taponphone-payments:
+    depends_on:
+      - taponphone-payments-mongo
+      # taponphone-payments-mongo:
+      #   condition: service_healthy
+    image: taponphone-payments
+    build:
+      context: ./taponphone-payments
+      dockerfile: ./Dockerfile
+    ports:
+      - 8082:8082
+      - 50052:50052
+    networks:
+      - taponphone-payments
+    healthcheck:
+      test: curl --fail --silent localhost:8082/actuator/health/readiness | grep UP || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  taponphone-payments-mongo:
+    image: mongo:6
+    environment:
+      - MONGO_INITDB_DATABASE=taponphone-payments
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+    ports:
+      - 27017:27017
+    volumes:
+      - taponphone-payments-mongo:/data/db
+    networks:
+      - taponphone-payments
+    # healthcheck:
+    #   test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
+volumes:
+  taponphone-markets-postgres:
+  taponphone-payments-mongo:
+networks:
+  taponphone-markets:
+  taponphone-payments:
