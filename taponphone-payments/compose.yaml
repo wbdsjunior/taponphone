@@ -1,14 +1,19 @@
-version: '3.4'
+name: payments
 services:
-  mongo:
-    image: mongo:6
-    environment:
-      - MONGO_INITDB_DATABASE=taponphone-payments
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
+  payments-mongo:
+    image: mongo:7
     ports:
       - 27017:27017
     volumes:
-      - mongo:/data/db
+      - payments-mongo:/data/db
+    networks:
+      - payments
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
-  mongo:
+  payments-mongo:
+networks:
+  payments:

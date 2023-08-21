@@ -1,6 +1,6 @@
-version: '3.4'
+name: markets
 services:
-  postgres:
+  markets-postgres:
     image: postgres:15
     environment:
       - POSTGRES_DB=taponphone-markets
@@ -9,8 +9,15 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - postgres:/var/lib/postgresql
-  # kafka:
+      - markets-postgres:/var/lib/postgresql
+    networks:
+      - markets
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # markets-kafka:
   #   image: bitnami/kafka:3.5
   #   environment:
   #     - KAFKA_CFG_NODE_ID=0
@@ -24,7 +31,12 @@ services:
   #   ports:
   #     - 9092:9092
   #   volumes:
-  #     - kafka:/bitnami
+  #     - markets-kafka:/bitnami
+  #   networks:
+  #     - markets
 volumes:
-  postgres:
-  # kafka:
+  markets-postgres:
+  # markets-kafka:
+networks:
+  markets:
+

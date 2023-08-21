@@ -1,26 +1,31 @@
-version: '3.4'
+name: wbdsjunior-taponphone
 services:
-  taponphone-markets:
+  wbdsjunior-taponphone-markets:
     depends_on:
-      taponphone-markets-postgres:
+      wbdsjunior-taponphone-markets-postgres:
         condition: service_healthy
-    image: taponphone-markets
+    image: wbdsjunior-taponphone-markets
     build:
       context: ./taponphone-markets
       dockerfile: ./Dockerfile
+      no_cache: true
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=50051,quiet=y
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://wbdsjunior-taponphone-markets-postgres:5432/taponphone-markets
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_FEIGNCLIENT_TAPONPHONE_PAYMENTS_SERVICE_URL=http://wbdsjunior-taponphone-payments:8082
     ports:
       - 8081:8081
       - 50051:50051
     networks:
-      - taponphone-markets
+      - wbdsjunior-taponphone
     healthcheck:
-      test: curl --fail --silent localhost:8081/actuator/health/readiness | grep UP || exit 1
+      test: curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
-  taponphone-markets-postgres:
+  wbdsjunior-taponphone-markets-postgres:
     image: postgres:15
     environment:
       - POSTGRES_DB=taponphone-markets
@@ -29,55 +34,51 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - taponphone-markets-postgres:/var/lib/postgresql
+      - wbdsjunior-taponphone-markets-postgres:/var/lib/postgresql
     networks:
-      - taponphone-markets
+      - wbdsjunior-taponphone
     healthcheck:
       test: pg_isready -U postgres
       interval: 10s
       timeout: 5s
       retries: 5
-  taponphone-payments:
+  wbdsjunior-taponphone-payments:
     depends_on:
-      - taponphone-payments-mongo
-      # taponphone-payments-mongo:
-      #   condition: service_healthy
-    image: taponphone-payments
+      wbdsjunior-taponphone-payments-mongo:
+        condition: service_healthy
+    image: wbdsjunior-taponphone-payments
     build:
       context: ./taponphone-payments
       dockerfile: ./Dockerfile
+      no_cache: true
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=50052,quiet=y
+      - SPRING_DATA_MONGODB_URI=mongodb://wbdsjunior-taponphone-payments-mongo:27017/taponphone-payments
     ports:
       - 8082:8082
       - 50052:50052
     networks:
-      - taponphone-payments
+      - wbdsjunior-taponphone
     healthcheck:
-      test: curl --fail --silent localhost:8082/actuator/health/readiness | grep UP || exit 1
+      test: curl --fail --silent http://localhost:8082/actuator/health/readiness | grep UP || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
-  taponphone-payments-mongo:
-    image: mongo:6
-    environment:
-      - MONGO_INITDB_DATABASE=taponphone-payments
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=root
+  wbdsjunior-taponphone-payments-mongo:
+    image: mongo:7
     ports:
       - 27017:27017
     volumes:
-      - taponphone-payments-mongo:/data/db
+      - wbdsjunior-taponphone-payments-mongo:/data/db
     networks:
-      - taponphone-payments
-    # healthcheck:
-    #   test: echo 'db.stats().ok' | mongo localhost:27017/test --quiet
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 5
+      - wbdsjunior-taponphone
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
-  taponphone-markets-postgres:
-  taponphone-payments-mongo:
+  wbdsjunior-taponphone-markets-postgres:
+  wbdsjunior-taponphone-payments-mongo:
 networks:
-  taponphone-markets:
-  taponphone-payments:
+  wbdsjunior-taponphone:
