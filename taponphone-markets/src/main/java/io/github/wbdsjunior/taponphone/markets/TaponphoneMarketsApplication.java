@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 
 import io.github.wbdsjunior.taponphone.markets.entities.MarketsRepository;
 import io.github.wbdsjunior.taponphone.markets.entities.SmartphonesRepository;
@@ -12,14 +13,22 @@ import io.github.wbdsjunior.taponphone.markets.usecases.CreateMarketSmartphoneSe
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 
-@OpenAPIDefinition(info = @Info(title = "Markets API", summary = "Wbdsjunior's Tap On Phone Market API", description = "Register markets, look up market details, add smartphones to a market, look up market' smartphone details, and list payments made with a smartphone"))
+@OpenAPIDefinition(info = @Info(
+          title = "Markets API"
+        , summary = "Wbdsjunior's Tap on Phone Market API"
+        , description = "Register markets, look up market details, add smartphones to a market, look up market' smartphone details, and list payments made with a smartphone"
+    ))
 @SpringBootApplication
 @EnableFeignClients
+@ComponentScan(basePackages = { "io.github.wbdsjunior.taponphone" })
 public class TaponphoneMarketsApplication {
 
     public static void main(String[] args) {
 
-        SpringApplication.run(TaponphoneMarketsApplication.class, args);
+        SpringApplication.run(
+                  TaponphoneMarketsApplication.class
+                , args
+            );
     }
 
     @Bean
@@ -35,7 +44,7 @@ public class TaponphoneMarketsApplication {
     }
 
     // @Bean
-    // public KafkaTemplate<?, ?> kafkaTemplate(@Value(value = "${spring.kafka.bootstrap-servers:localhost:9092}") final String kafkaBootstrapServers) {
+    // public KafkaTemplate<?, ?> kafkaTemplate(@Value("${spring.kafka.bootstrap-servers:localhost:9092}") final String kafkaBootstrapServers) {
 
     //     Map<String, Object> configs = new HashMap<>();
     //     configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServers);

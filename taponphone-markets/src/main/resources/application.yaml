@@ -3,30 +3,28 @@ management:
     metrics:
       export:
         enabled: false
+  endpoint:
+    health:
+      probes:
+        enabled: true
   health:
     livenessstate:
       enabled: true
     readinessstate:
       enabled: true
-  endpoint:
-    health:
-      probes:
-        enabled: true
 
 server:
   error:
+    include-exception: false
+    include-stacktrace: never
     whitelabel:
       enabled: false
-  port: 8081
 
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/taponphone-markets}
-    username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
-  jpa:
-    hibernate:
-        ddl-auto: update
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:postgres@localhost:5432/taponphone-markets}
+  flyway:
+    sql-migration-prefix: postgresql-v-
   mvc:
     throw-exception-if-no-handler-found: true
   web:
@@ -34,4 +32,6 @@ spring:
       add-mappings: false
 
 springdoc:
+  api-docs:
+     path: /api-docs/v3
   packages-to-scan: io.github.wbdsjunior.taponphone.markets.controllers

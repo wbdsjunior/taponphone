@@ -1,10 +1,9 @@
 package io.github.wbdsjunior.taponphone.markets.controllers;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriBuilder;
 
 import io.github.wbdsjunior.taponphone.markets.persistences.PaymentsFeignClientRepository;
 
@@ -28,12 +28,18 @@ public class SmartphonePaymentsRestController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Set<PaymentDto> find(@PathVariable final UUID smartphoneId) {
+    public List<PaymentDto> find(
+              @PathVariable final UUID smartphoneId
+            , final UriBuilder uriBuilder
+        ) {
 
         return Optional.ofNullable(paymentsFeignClientRepository.findByPayeeSmartphoneId(smartphoneId))
                 .orElse(Collections.emptyList())
                 .stream()
-                .map(PaymentDto::fromPaymentEntity)
-                .collect(Collectors.toSet());
+                .map(paymentEntity -> new PaymentDto(
+                            smartphoneId
+                          , paymentEntity
+                    ))
+                .toList();
     }
 }

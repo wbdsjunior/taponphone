@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriBuilder;
 
 import io.github.wbdsjunior.taponphone.markets.persistences.SmartphonesJpaRepository;
 
@@ -21,10 +22,13 @@ public class SmartphonesRestController {
     }
 
     @GetMapping
-    public SmartphoneDto find(@PathVariable final UUID smartphoneId) {
+    public SmartphoneDto find(
+              @PathVariable final UUID smartphoneId
+            , final UriBuilder uriBuilder
+        ) {
 
         return smartphonesJpaRepository.findById(smartphoneId)
-            .map(SmartphoneDto::fromSmartphoneEntity)
+            .map(SmartphoneDto::new)
             .orElseThrow(() -> new IllegalStateException("Market not found"));
     }
 }

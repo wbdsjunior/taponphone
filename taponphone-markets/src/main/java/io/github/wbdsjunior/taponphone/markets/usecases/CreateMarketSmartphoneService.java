@@ -12,7 +12,10 @@ public class CreateMarketSmartphoneService<S extends ToSmartphone, I> {
         this.smartphonesRepository = smartphonesRepository;
     }
 
-    public I create(final String marketRegistrationNumber, final S smartphone) {
+    public I create(
+              final String marketRegistrationNumber
+            , final S smartphone
+        ) {
 
         if (
                        null == marketRegistrationNumber
@@ -27,7 +30,11 @@ public class CreateMarketSmartphoneService<S extends ToSmartphone, I> {
 
             throw new IllegalStateException("Smartphone cannot be null");
         }
-        I id = smartphonesRepository.insert(marketRegistrationNumber, smartphone.toSmartphone()).getId();
+        I id = smartphonesRepository.insert(
+                  marketRegistrationNumber
+                , smartphone.toSmartphone()
+            )
+                .getId();
 
         // TODO: enviar mensagem para o broker
 

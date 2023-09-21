@@ -1,19 +1,21 @@
 name: payments
-services:
-  payments-mongo:
-    image: mongo:7
-    ports:
-      - 27017:27017
-    volumes:
-      - payments-mongo:/data/db
-    networks:
-      - payments
-    healthcheck:
-      test: echo 'db.stats().ok' | mongosh test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-volumes:
-  payments-mongo:
 networks:
   payments:
+volumes:
+  payments-mongo:
+services:
+  payments-mongo:
+    extends:
+      file: ./compose.base.yaml
+      service: base
+    image: mongo:7
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongo
+    volumes:
+      - payments-mongo:/data/db
+    ports:
+      - 27017:27017
+    healthcheck:
+      test: echo 'db.stats().ok' | mongosh -u mongo -p mongo --authenticationDatabase admin test --quiet
+    restart: always

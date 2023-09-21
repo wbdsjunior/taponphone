@@ -2,19 +2,18 @@ package io.github.wbdsjunior.taponphone.markets.controllers;
 
 import io.github.wbdsjunior.taponphone.markets.entities.Market;
 import io.github.wbdsjunior.taponphone.markets.entities.ToMarket;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@Data
-public class CreateMarketDto implements ToMarket {
-
-    private String registrationNumber;
-    private String name;
+public record CreateMarketDto(
+          String registrationNumber
+        , String name
+  ) implements ToMarket {
 
     @Override
     public Market toMarket() {
 
-        return new Market(registrationNumber, name);
+        return new Market(
+                  registrationNumber
+                , name
+            );
     }
 }

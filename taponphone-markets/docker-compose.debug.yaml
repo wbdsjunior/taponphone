@@ -1,48 +1,40 @@
 name: taponphone-markets
+networks:
+  taponphone-markets:
+volumes:
+  taponphone-markets-postgres:
 services:
   taponphone-markets:
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
+    build:
+      dockerfile: ./Dockerfile
+      no_cache: true
+    image: taponphone-markets:1
+    environment:
+      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000,quiet=y
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://taponphone-markets-postgres:5432/taponphone-markets?user=postgres&password=postgres
+    ports:
+      - 8280:8080
+      - 8200:8000
     depends_on:
       taponphone-markets-postgres:
         condition: service_healthy
-    image: taponphone-markets
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-      no_cache: true
-    environment:
-      - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=50051,quiet=y
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://taponphone-markets-postgres:5432/taponphone-markets
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=postgres
-      - SPRING_FEIGNCLIENT_TAPONPHONE_PAYMENTS_SERVICE_URL=http://taponphone-payments:8082
-    ports:
-      - 8081:8081
-      - 50051:50051
-    networks:
-      - taponphone-markets
     healthcheck:
-      test: curl --fail --silent http://localhost:8081/actuator/health/readiness | grep UP || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   taponphone-markets-postgres:
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
     image: postgres:15
     environment:
-      - POSTGRES_DB=taponphone-markets
-      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    ports:
-      - 5432:5432
+      - POSTGRES_DB=taponphone-markets
     volumes:
       - taponphone-markets-postgres:/var/lib/postgresql
-    networks:
-      - taponphone-markets
+    ports:
+      - 5432:5432
     healthcheck:
       test: pg_isready -U postgres
-      interval: 10s
-      timeout: 5s
-      retries: 5
-volumes:
-  taponphone-markets-postgres:
-networks:
-  taponphone-markets:
+    restart: always

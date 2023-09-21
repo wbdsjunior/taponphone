@@ -1,0 +1,43 @@
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+
+management:
+  defaults:
+    metrics:
+      export:
+        enabled: false
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+server:
+  error:
+    include-exception: true
+    include-stacktrace: never
+    whitelabel:
+      enabled: false
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:postgres@localhost:5432/taponphone-authentications}
+  flyway:
+    sql-migration-prefix: postgresql-v-
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+springdoc:
+  api-docs:
+     path: /api-docs/v3
+  packages-to-scan: io.github.wbdsjunior.taponphone.authentications.controllers

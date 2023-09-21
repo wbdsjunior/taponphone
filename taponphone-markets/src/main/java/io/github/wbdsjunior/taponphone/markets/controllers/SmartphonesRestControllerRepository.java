@@ -2,7 +2,6 @@ package io.github.wbdsjunior.taponphone.markets.controllers;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Repository;
 
@@ -19,29 +18,34 @@ public class SmartphonesRestControllerRepository implements SmartphonesRepositor
     private final SmartphonesJpaRepository smartphonesJpaRepository;
     private final MarketsJpaRepository marketsJpaRepository;
 
-    public SmartphonesRestControllerRepository(final SmartphonesJpaRepository smartphonesJpaRepository, final MarketsJpaRepository marketsJpaRepository) {
+    public SmartphonesRestControllerRepository(
+              final SmartphonesJpaRepository smartphonesJpaRepository
+            , final MarketsJpaRepository marketsJpaRepository
+        ) {
 
         this.smartphonesJpaRepository = smartphonesJpaRepository;
         this.marketsJpaRepository = marketsJpaRepository;
     }
 
     @Override
-    public SmartphoneDto insert(final String marketRegistrationNumber, final Smartphone smartphone) {
+    public SmartphoneDto insert(
+              final String marketRegistrationNumber
+            , final Smartphone smartphone
+        ) {
 
-        return SmartphoneDto.fromSmartphoneEntity(smartphonesJpaRepository.save(SmartphoneEntity.fromSmarphone(
-                                  marketsJpaRepository.findByRegistrationNumber(marketRegistrationNumber)
-                                        .map(MarketEntity::getId)
-                                        .orElseThrow(() -> new IllegalStateException("Market not found"))
-                                , smartphone
-                            )
-                    )
-            );
+        return new SmartphoneDto(smartphonesJpaRepository.save(new SmartphoneEntity(
+                  marketsJpaRepository.findByRegistrationNumber(marketRegistrationNumber)
+                        .map(MarketEntity::getId)
+                        .orElseThrow(() -> new IllegalStateException("Market not found"))
+                , smartphone
+            )));
     }
 
     @Override
     public Optional<SmartphoneDto> selectByPhoneNumber(final String phoneNumber) {
 
-        return smartphonesJpaRepository.findByPhoneNumber(phoneNumber).map(SmartphoneDto::fromSmartphoneEntity);
+        return smartphonesJpaRepository.findByPhoneNumber(phoneNumber)
+                .map(SmartphoneDto::new);
     }
 
     @Override
@@ -49,7 +53,7 @@ public class SmartphonesRestControllerRepository implements SmartphonesRepositor
 
         return smartphonesJpaRepository.findByMarketRegistrationNumber(marketRegistrationNumber)
                 .stream()
-                .map(SmartphoneDto::fromSmartphoneEntity)
-                .collect(Collectors.toList());
+                .map(SmartphoneDto::new)
+                .toList();
     }
 }

@@ -18,6 +18,7 @@ public class CreateMarketService<M extends ToMarket, I> {
 
             throw new IllegalStateException("Market cannot be null");
         }
-        return marketsRepository.create(market.toMarket()).getId();
+        return marketsRepository.create(market.toMarket())
+                .getId();
     }
 }

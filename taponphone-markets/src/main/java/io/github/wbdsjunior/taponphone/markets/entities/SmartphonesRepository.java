@@ -5,7 +5,10 @@ import java.util.Optional;
 
 public interface SmartphonesRepository<S extends GetId<I>, I> {
 
-    S insert(final String marketRegistrationNumber, final Smartphone smartphone);
+    S insert(
+              final String marketRegistrationNumber
+            , final Smartphone smartphone
+        );
 
     Optional<S> selectByPhoneNumber(final String phoneNumber);
 

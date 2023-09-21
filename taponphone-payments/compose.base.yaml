@@ -1,0 +1,6 @@
+services:
+  base:
+    environment:
+      - TZ=America/Sao_Paulo
+    networks:
+      - payments

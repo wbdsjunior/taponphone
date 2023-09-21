@@ -1,9 +1,7 @@
 package io.github.wbdsjunior.taponphone.markets.controllers;
 
-import java.net.URI;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriBuilder;
 
 import io.github.wbdsjunior.taponphone.markets.persistences.MarketEntity;
 import io.github.wbdsjunior.taponphone.markets.persistences.MarketsJpaRepository;
@@ -40,7 +39,8 @@ public class MarketSmartphonesRestController {
     public MarketSmartphonesRestController(
               final CreateMarketSmartphoneService<CreateSmartphoneDto, String> createMarketSmartphoneService
             , final MarketsJpaRepository marketsJpaRepository
-            , final SmartphonesJpaRepository smartphonesJpaRepository) {
+            , final SmartphonesJpaRepository smartphonesJpaRepository
+        ) {
 
         this.createMarketSmartphoneService = createMarketSmartphoneService;
         this.marketsJpaRepository = marketsJpaRepository;
@@ -55,14 +55,15 @@ public class MarketSmartphonesRestController {
                     , description = "Market id"
                 )
             , requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(content = @Content(
-                          mediaType = "application/json"
-                        , schema = @Schema(implementation = CreateSmartphoneDto.class)
-                    )
+                      mediaType = "application/json"
+                    , schema = @Schema(implementation = CreateSmartphoneDto.class)
                 )
+            )
         )
     @ApiResponses({
               @ApiResponse(
-                      responseCode = "201", description = "Created smartphone path"
+                      responseCode = "201"
+                    , description = "Smartphone created"
                     , headers = @Header(
                               name = "Location"
                             , description = "Created smartphone path"
@@ -82,26 +83,36 @@ public class MarketSmartphonesRestController {
     public ResponseEntity<Void> create(
               @PathVariable final UUID marketId
             , @RequestBody(required = true) final CreateSmartphoneDto createSmartphoneDto
+            , final UriBuilder uriBuilder
         ) {
 
-        return ResponseEntity.created(URI.create("/smartphones/%s".formatted(createMarketSmartphoneService.create(
-                          marketsJpaRepository.findById(marketId)
-                                .map(MarketEntity::getRegistrationNumber)
-                                .orElseThrow(() -> new IllegalStateException("Market not found"))
-                        , createSmartphoneDto
-                    ))))
+        return ResponseEntity.created(uriBuilder.path("{marketId}/smartphones/{smartphoneId}")
+                .build(
+                          marketId
+                        , createMarketSmartphoneService.create(
+                                  marketsJpaRepository.findById(marketId)
+                                        .map(MarketEntity::getRegistrationNumber)
+                                        .orElseThrow(() -> new IllegalStateException("Market not found"))
+                                , createSmartphoneDto
+                            )
+                    )
+            )
             .build();
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Set<SmartphoneDto> smartphones(@PathVariable final UUID marketId) {
+    public List<SmartphoneDto> smartphones(
+            @PathVariable final UUID marketId
+            , final UriBuilder uriBuilder
+        ) {
 
         return smartphonesJpaRepository.findByMarketRegistrationNumber(marketsJpaRepository.findById(marketId)
                         .map(MarketEntity::getRegistrationNumber)
-                        .orElseThrow(() -> new IllegalStateException("Market not found")))
-            .stream()
-            .map(SmartphoneDto::fromSmartphoneEntity)
-            .collect(Collectors.toSet());
+                        .orElseThrow(() -> new IllegalStateException("Market not found"))
+                    )
+                .stream()
+                .map(SmartphoneDto::new)
+                .toList();
     }
 }

@@ -3,38 +3,48 @@ package io.github.wbdsjunior.taponphone.markets.persistences;
 import java.util.UUID;
 
 import io.github.wbdsjunior.taponphone.markets.entities.Market;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
-@NoArgsConstructor
-@Data
 @AllArgsConstructor
-@Builder
+@Getter
+@EqualsAndHashCode
 @Entity
 @Table(name = "market")
 public class MarketEntity {
 
+    @Size(
+              min = 1
+            , max = 32
+        )
+    private String registrationNumber;
+
+    @Size(
+              min = 1
+            , max = 256
+        )
+    private String name;
+
     @Id
     private UUID id;
 
-    @Column(length = 32, nullable = false, unique = true)
-    private String registrationNumber;
+    public MarketEntity(final UUID id) {
 
-    @Column(length = 256, nullable = false, unique = true)
-    private String name;
+        this(
+                  null
+                , null
+                , id
+            );
+    }
 
-    public static MarketEntity fromMarket(final Market market) {
+    public MarketEntity(final Market market) {
 
-        return MarketEntity.builder()
-                .id(UUID.randomUUID())
-                .registrationNumber(market.getRegistrationNumber())
-                .name(market.getName())
-                .build();
+        this.registrationNumber = market.getRegistrationNumber();
+        this.name = market.getName();
     }
 }

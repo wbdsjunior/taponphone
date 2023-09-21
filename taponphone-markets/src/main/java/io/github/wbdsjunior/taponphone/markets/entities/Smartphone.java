@@ -12,9 +12,10 @@ public class Smartphone {
         if (
                        null == phoneNumber
                     || phoneNumber.trim()
-                            .isEmpty()) {
+                            .isEmpty()
+                ) {
 
-            throw new IllegalStateException("Smartphone phone number cannot be null or empty");
+            throw new IllegalStateException("Smartphone phone number cannot be blank");
         }
         this.phoneNumber = phoneNumber;
 

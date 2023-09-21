@@ -1,39 +1,38 @@
 name: taponphone-payments
+networks:
+  taponphone-payments:
+volumes:
+  taponphone-payments-mongo:
 services:
   taponphone-payments:
-    depends_on:
-      taponphone-payments-mongo:
-        condition: service_healthy
-    image: taponphone-payments
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
     build:
-      context: .
       dockerfile: ./Dockerfile
       no_cache: true
+    image: taponphone-payments:1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://taponphone-payments-mongo:27017/taponphone-payments
     ports:
-      - 8082:8082
-    networks:
-      - taponphone-payments
+      - 8380:8080
+    depends_on:
+      taponphone-payments-mongo:
+        condition: service_healthy
     healthcheck:
-      test: curl --fail --silent http://localhost:8082/actuator/health/readiness | grep UP || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   taponphone-payments-mongo:
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
     image: mongo:7
-    ports:
-      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo
+      - MONGO_INITDB_ROOT_PASSWORD=mongo
     volumes:
       - taponphone-payments-mongo:/data/db
-    networks:
-      - taponphone-payments
+    ports:
+      - 27017:27017
     healthcheck:
-      test: echo 'db.stats().ok' | mongosh test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-volumes:
-  taponphone-payments-mongo:
-networks:
-  taponphone-payments:
+      test: echo 'db.stats().ok' | mongosh -u mongo -p mongo --authenticationDatabase admin test --quiet
+    restart: always

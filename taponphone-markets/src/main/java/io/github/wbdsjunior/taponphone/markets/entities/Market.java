@@ -13,12 +13,12 @@ public class Market {
         ) {
 
         if (
-                      null == registrationNumber
+                       null == registrationNumber
                     || registrationNumber.trim()
                             .isEmpty()
                 ) {
 
-            throw new IllegalStateException("Market registration number cannot be null or empty");
+            throw new IllegalStateException("Market registration number cannot be blank");
         }
         this.registrationNumber = registrationNumber.trim();
 
@@ -28,7 +28,7 @@ public class Market {
                             .isEmpty()
                 ) {
 
-            throw new IllegalStateException("Market name cannot be null or empty");
+            throw new IllegalStateException("Market name cannot be blank");
         }
         this.name = name;
     }

@@ -21,13 +21,13 @@ public class MarketsRestControllerRepository implements MarketsRepository<Market
     @Override
     public MarketDto create(Market market) {
 
-         return MarketDto.fromMarketEntity(marketsJpaRepository.save(MarketEntity.fromMarket(market)));
+         return new MarketDto(marketsJpaRepository.save(new MarketEntity(market)));
     }
 
     @Override
-    public Optional<MarketDto> selectByRegistrationNumber(String registrationNumber) {
+    public Optional<MarketDto> selectByRegistrationNumber(final String registrationNumber) {
 
         return marketsJpaRepository.findByRegistrationNumber(registrationNumber)
-                .map(MarketDto::fromMarketEntity);
+                .map(MarketDto::new);
     }
 }
