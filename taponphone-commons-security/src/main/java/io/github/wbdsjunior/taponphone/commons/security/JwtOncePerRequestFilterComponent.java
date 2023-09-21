@@ -1,12 +1,11 @@
 package io.github.wbdsjunior.taponphone.commons.security;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -16,21 +15,16 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-// @Component
+@Component
 public class JwtOncePerRequestFilterComponent extends OncePerRequestFilter {
 
     private static final String BEARER_AUTHENTICATION_SCHEME = "Bearer ";
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
 
-    public JwtOncePerRequestFilterComponent(
-              final JwtService jwtService
-            , final UserDetailsService userDetailsService
-        ) {
+    public JwtOncePerRequestFilterComponent(final JwtService jwtService) {
 
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -40,88 +34,81 @@ public class JwtOncePerRequestFilterComponent extends OncePerRequestFilter {
             , final FilterChain filterChain
         ) throws ServletException, IOException {
 
-        var requestAuthorizationHeader = httpServletRequest.getHeader("Authorization");
+        SecurityContextHolder.setContext(securityContext(httpServletRequest));
+        filterChain.doFilter(
+                  httpServletRequest
+                , httpServletResponse
+            );
+    }
 
-        if (!requestHasAuthorizationHeader(requestAuthorizationHeader)) {
+    private SecurityContext securityContext(final HttpServletRequest httpServletRequest) {
+
+        var securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(usernamePasswordAuthenticationToken(
+                  userDetails(bearerToken(authorizationHeader(httpServletRequest)))
+                , httpServletRequest));
+        return securityContext;
+    }
+
+    private String authorizationHeader(final HttpServletRequest httpServletRequest) {
+        var authorizationHeader = httpServletRequest.getHeader("Authorization");
+
+        if (!httpServletRequestHasAuthorizationHeader(authorizationHeader)) {
 
             throw new IllegalArgumentException("Authorization header cannot be blank");
         }
+        return authorizationHeader;
+    }
 
-        if (!authorizationHeaderHasBearerToken(requestAuthorizationHeader)) {
+    private boolean httpServletRequestHasAuthorizationHeader(String authorizationHeader) {
+
+        return
+                   null != authorizationHeader
+                && authorizationHeader.trim()
+                        .isEmpty();
+    }
+
+    private String bearerToken(String authorizationHeader) {
+
+        if (!authorizationHeaderHasBearerAuthenticationScheme(authorizationHeader)) {
+
+            throw new IllegalArgumentException("Authorization header must starts with bearer authentication scheme");
+        }
+        var bearerToken = authorizationHeader.replace(
+                  JwtOncePerRequestFilterComponent.BEARER_AUTHENTICATION_SCHEME
+                , ""
+            )
+            .trim();
+
+        if (null == bearerToken) {
 
             throw new IllegalArgumentException("Authorization header must be a bearer token");
         }
-        var bearerToken = extractBearerToken(requestAuthorizationHeader);
+        return bearerToken;
+    }
 
-        try {
-            if (!bearerTokenIsValidJwt(bearerToken)) {
+    private boolean authorizationHeaderHasBearerAuthenticationScheme(String authorizationHeader) {
 
-                throw new IllegalArgumentException("Bearer must be a valid JWT");
-            }
-            var jwtSubject = extractSubject(bearerToken);
+        return authorizationHeader.startsWith(JwtOncePerRequestFilterComponent.BEARER_AUTHENTICATION_SCHEME);
+    }
 
-            if (jwtSubjectIsValidUser(jwtSubject)) {
+    private UserDetails userDetails(String bearerToken) {
 
-                throw new IllegalArgumentException("JWT subject must be a valid User");
-            }
-            var userDetails = userDetailsService.loadUserByUsername(jwtSubject);
-            var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                    userDetails
+        return jwtService.extractUserDetails(bearerToken);
+    }
+
+    private UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken(
+              final UserDetails userDetails
+            , final HttpServletRequest httpServletRequest
+        ) {
+
+        var usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                      userDetails
                     , null
                     , userDetails.getAuthorities()
                 );
-            usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource()
-                    .buildDetails(httpServletRequest));
-            var securityContext = SecurityContextHolder.createEmptyContext();
-            securityContext.setAuthentication(usernamePasswordAuthenticationToken);
-            SecurityContextHolder.setContext(securityContext);
-            filterChain.doFilter(
-                    httpServletRequest
-                    , httpServletResponse
-                );
-        } catch (
-                  InvalidKeySpecException
-                | NoSuchAlgorithmException e
-            ) {
-
-            // TODO Auto-generated catch block
-            new RuntimeException(e);
-        }
-    }
-    private boolean requestHasAuthorizationHeader(String requestAuthorizationHeader) {
-
-        return
-                   null != requestAuthorizationHeader
-                && requestAuthorizationHeader.trim()
-                        .isEmpty();
-    }
-
-    private boolean authorizationHeaderHasBearerToken(String requestAuthorizationHeader) {
-
-        return
-                   requestAuthorizationHeader.startsWith(JwtOncePerRequestFilterComponent.BEARER_AUTHENTICATION_SCHEME)
-                && extractBearerToken(requestAuthorizationHeader)
-                        .isEmpty();
-    }
-
-    private String extractBearerToken(String requestAuthorizationHeader) {
-
-        return requestAuthorizationHeader.replace(JwtOncePerRequestFilterComponent.BEARER_AUTHENTICATION_SCHEME, "")
-                .trim();
-    }
-
-    private boolean bearerTokenIsValidJwt(String bearerToken) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-
-        return null != extractSubject(bearerToken);
-    }
-
-    private String extractSubject(String bearerToken) throws InvalidKeySpecException, NoSuchAlgorithmException, IOException {
-
-        return jwtService.extractSubject(bearerToken);
-    }
-
-    private boolean jwtSubjectIsValidUser(String jwtSubject) {
-
-        return null != userDetailsService.loadUserByUsername(jwtSubject);
+        usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource()
+                .buildDetails(httpServletRequest));
+        return usernamePasswordAuthenticationToken;
     }
 }

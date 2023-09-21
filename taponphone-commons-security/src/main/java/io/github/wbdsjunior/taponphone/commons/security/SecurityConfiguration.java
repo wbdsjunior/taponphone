@@ -18,6 +18,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -37,12 +38,15 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(final HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+              final HttpSecurity httpSecurity
+            , final JwtOncePerRequestFilterComponent jwtOncePerRequestFilterComponent
+        ) throws Exception {
 
         return httpSecurity.csrf(disable())
                 .sessionManagement(statelessSessionCreationPolicy())
                 .authorizeHttpRequests(anyRequestAuthenticated())
-                // .addFilterBefore(jwtOncePerRequestFilterComponent, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtOncePerRequestFilterComponent, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
