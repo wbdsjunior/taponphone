@@ -14,8 +14,6 @@ services:
       - POSTGRES_DB=taponphone-markets
     volumes:
       - markets-postgres:/var/lib/postgresql
-    ports:
-      - 5432:5432
     healthcheck:
       test: pg_isready -U postgres
     restart: always

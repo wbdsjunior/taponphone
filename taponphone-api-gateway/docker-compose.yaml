@@ -1,0 +1,16 @@
+name: taponphone-api-gateway
+networks:
+  taponphone-api-gateway:
+services:
+  taponphone-api-gateway:
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
+    build:
+      dockerfile: ./Dockerfile
+      no_cache: true
+    image: taponphone-api-gateway:1
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1

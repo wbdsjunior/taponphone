@@ -14,8 +14,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=mongo
     volumes:
       - payments-mongo:/data/db
-    ports:
-      - 27017:27017
     healthcheck:
       test: echo 'db.stats().ok' | mongosh -u mongo -p mongo --authenticationDatabase admin test --quiet
     restart: always

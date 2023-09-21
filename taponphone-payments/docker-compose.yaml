@@ -14,8 +14,6 @@ services:
     image: taponphone-payments:1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://taponphone-payments-mongo:27017/taponphone-payments
-    ports:
-      - 8380:8080
     depends_on:
       taponphone-payments-mongo:
         condition: service_healthy
@@ -31,8 +29,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=mongo
     volumes:
       - taponphone-payments-mongo:/data/db
-    ports:
-      - 27017:27017
     healthcheck:
       test: echo 'db.stats().ok' | mongosh -u mongo -p mongo --authenticationDatabase admin test --quiet
     restart: always

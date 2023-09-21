@@ -6,6 +6,19 @@ volumes:
   wbdsjunior-taponphone-markets-postgres:
   wbdsjunior-taponphone-payments-mongo:
 services:
+  wbdsjunior-taponphone-api-gateway:
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
+    build:
+      context: ./taponphone-api-gateway
+      dockerfile: ./Dockerfile
+      no_cache: true
+    image: wbdsjunior-taponphone-api-gateway:1
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   wbdsjunior-taponphone-authentications:
     extends:
       file: ./docker-compose.base.yaml
@@ -17,9 +30,6 @@ services:
     image: wbdsjunior-taponphone-authentications:1
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://wbdsjunior-taponphone-authentications-postgres:5432/taponphone-authentications?user=postgres&password=postgres
-      - SPRING_FEIGNCLIENT_TAPONPHONE_PAYMENTS_SERVICE_URL=http://wbdsjunior-taponphone-payments:8080
-    ports:
-      - 8180:8080
     depends_on:
       wbdsjunior-taponphone-authentications-postgres:
         condition: service_healthy
@@ -35,8 +45,6 @@ services:
       - POSTGRES_DB=taponphone-authentications
     volumes:
       - wbdsjunior-taponphone-authentications-postgres:/var/lib/postgresql
-    ports:
-      - 5532:5432
     healthcheck:
       test: pg_isready -U postgres
     restart: always
@@ -52,8 +60,6 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://wbdsjunior-taponphone-markets-postgres:5432/taponphone-markets?user=postgres&password=postgres
       - SPRING_FEIGNCLIENT_TAPONPHONE_PAYMENTS_SERVICE_URL=http://wbdsjunior-taponphone-payments:8080
-    ports:
-      - 8280:8080
     depends_on:
       wbdsjunior-taponphone-markets-postgres:
         condition: service_healthy
@@ -69,8 +75,6 @@ services:
       - POSTGRES_DB=taponphone-markets
     volumes:
       - wbdsjunior-taponphone-markets-postgres:/var/lib/postgresql
-    ports:
-      - 5632:5432
     healthcheck:
       test: pg_isready -U postgres
     restart: always
@@ -85,8 +89,6 @@ services:
     image: wbdsjunior-taponphone-payments:1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://wbdsjunior-taponphone-payments-mongo:27017/taponphone-payments
-    ports:
-      - 8380:8080
     depends_on:
       wbdsjunior-taponphone-payments-mongo:
         condition: service_healthy
@@ -102,8 +104,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=mongo
     volumes:
       - wbdsjunior-taponphone-payments-mongo:/data/db
-    ports:
-      - 27017:27017
     healthcheck:
       test: echo 'db.stats().ok' | mongosh -u mongo -p mongo --authenticationDatabase admin test --quiet
     restart: always
