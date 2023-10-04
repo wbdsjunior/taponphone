@@ -13,6 +13,7 @@ services:
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000,quiet=y
     ports:
+      - 8000:8000
       - 8080:8080
-    healthcheck:
-      test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
+    # healthcheck:
+    #   test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1

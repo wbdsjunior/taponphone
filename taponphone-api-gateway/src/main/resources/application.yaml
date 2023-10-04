@@ -1,1 +1,45 @@
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
 
+management:
+  datadog:
+    metrics:
+      export:
+        enabled: false
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+server:
+  error:
+    include-binding-errors: on-param
+    include-message: on-param
+    whitelabel:
+      enabled: false
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: taponphone-authentications
+          uri: ${SPRING_GATEWAY_TAPONPHONE_AUTHENTICATIONS_SERVICE_URI:http://localhost:8180}
+          predicates:
+            - Path=/authentications/**
+          filters:
+            - RewritePath=/authentications/?(?<segment>.*), /$\{segment}
+        - id: taponphone-markets
+          uri: ${SPRING_GATEWAY_TAPONPHONE_MARKETS_SERVICE_URI:http://localhost:8280}
+          predicates:
+            - Path=/markets/**
+          filters:
+            - RewritePath=/markets/?(?<segment>.*), /$\{segment}
+        - id: taponphone-payments
+          uri: ${SPRING_GATEWAY_TAPONPHONE_PAYMETS_SERVICE_URI:http://localhost:8380}
+          predicates:
+            - Path=/payments/**
+          filters:
+            - RewritePath=/payments/?(?<segment>.*), /$\{segment}

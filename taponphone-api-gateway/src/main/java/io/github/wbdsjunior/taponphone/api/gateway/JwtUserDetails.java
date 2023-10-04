@@ -1,4 +1,4 @@
-package io.github.wbdsjunior.taponphone.commons.security;
+package io.github.wbdsjunior.taponphone.api.gateway;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +18,7 @@ public record JwtUserDetails(
 
         this(
                   decodedJwt.getSubject()
-                , Optional.ofNullable(decodedJwt.getClaim("authorities"))
+                , Optional.ofNullable(decodedJwt.getClaim("aut"))
                         .map(claim -> claim.asList(String.class))
                         .orElse(null));
     }

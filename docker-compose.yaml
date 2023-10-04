@@ -15,6 +15,10 @@ services:
       dockerfile: ./Dockerfile
       no_cache: true
     image: wbdsjunior-taponphone-api-gateway:1
+    environment:
+      - SPRING_GATEWAY_TAPONPHONE_AUTHENTICATIONS_SERVICE_URI=http://wbdsjunior-taponphone-authentications:8080
+      - SPRING_GATEWAY_TAPONPHONE_MARKETS_SERVICE_URI=http://wbdsjunior-taponphone-markets:8080
+      - SPRING_GATEWAY_TAPONPHONE_PAYMETS_SERVICE_URI=http://wbdsjunior-taponphone-payments:8080
     ports:
       - 8080:8080
     healthcheck:

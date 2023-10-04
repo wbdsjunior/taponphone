@@ -14,6 +14,8 @@ services:
     image: taponphone-payments:1
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://taponphone-payments-mongo:27017/taponphone-payments
+    ports:
+      - 8080:8080
     depends_on:
       taponphone-payments-mongo:
         condition: service_healthy

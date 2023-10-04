@@ -14,6 +14,8 @@ services:
     image: taponphone-authentications:1
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://taponphone-authentications-postgres:5432/taponphone-authentications?user=postgres&password=postgres
+    ports:
+      - 8080:8080
     depends_on:
       taponphone-authentications-postgres:
         condition: service_healthy

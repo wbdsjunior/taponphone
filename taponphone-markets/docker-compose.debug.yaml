@@ -15,6 +15,9 @@ services:
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000,quiet=y
       - SPRING_DATASOURCE_URL=jdbc:postgresql://taponphone-markets-postgres:5432/taponphone-markets?user=postgres&password=postgres
+    ports:
+      - 8000:8000
+      - 8080:8080
     depends_on:
       taponphone-markets-postgres:
         condition: service_healthy

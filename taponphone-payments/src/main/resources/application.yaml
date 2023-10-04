@@ -1,5 +1,5 @@
 management:
-  defaults:
+  datadog:
     metrics:
       export:
         enabled: false
@@ -7,16 +7,11 @@ management:
     health:
       probes:
         enabled: true
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
 
 server:
   error:
-    include-exception: false
-    include-stacktrace: never
+    include-binding-errors: on-param
+    include-message: on-param
     whitelabel:
       enabled: false
 

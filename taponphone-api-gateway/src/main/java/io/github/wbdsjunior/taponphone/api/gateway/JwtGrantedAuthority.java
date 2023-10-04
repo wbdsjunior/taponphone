@@ -1,4 +1,4 @@
-package io.github.wbdsjunior.taponphone.commons.security;
+package io.github.wbdsjunior.taponphone.api.gateway;
 
 import org.springframework.security.core.GrantedAuthority;
 

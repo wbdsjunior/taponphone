@@ -15,6 +15,9 @@ services:
     environment:
       - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000,quiet=y
       - SPRING_DATA_MONGODB_URI=mongodb://taponphone-payments-mongo:27017/taponphone-payments
+    ports:
+      - 8000:8000
+      - 8080:8080
     depends_on:
       taponphone-payments-mongo:
         condition: service_healthy
