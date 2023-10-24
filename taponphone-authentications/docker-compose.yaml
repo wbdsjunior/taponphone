@@ -25,7 +25,7 @@ services:
     extends:
       file: ./docker-compose.base.yaml
       service: base
-    image: postgres:15
+    image: postgres:16-alpine
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-authentications

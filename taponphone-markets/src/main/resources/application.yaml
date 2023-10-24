@@ -8,6 +8,12 @@ management:
       probes:
         enabled: true
 
+# resilience4j.timelimiter:
+#   configs:
+#     default:
+#       cancelRunningFuture: true
+#       timeoutDuration: 5s
+
 server:
   error:
     include-binding-errors: on-param

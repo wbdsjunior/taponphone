@@ -1,5 +1,5 @@
-FROM eclipse-temurin:17
-WORKDIR /taponphone
+FROM eclipse-temurin:21-alpine
+WORKDIR /home/root/taponphone
 COPY .mvn/ .mvn
 COPY src/ ./src
 COPY mvnw pom.xml ./

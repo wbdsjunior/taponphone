@@ -22,8 +22,19 @@ server:
       enabled: false
 
 spring:
+  redis:
+    url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379/0}
   cloud:
     gateway:
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 10
+            redis-rate-limiter.burstCapacity: 20
+            redis-rate-limiter.requestedTokens: 1
+      filter:
+         request-rate-limiter:
+           deny-empty-key: false
       routes:
         - id: taponphone-authentications
           uri: ${SPRING_GATEWAY_TAPONPHONE_AUTHENTICATIONS_SERVICE_URI:http://localhost:8180}

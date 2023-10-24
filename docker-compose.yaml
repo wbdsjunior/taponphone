@@ -2,6 +2,7 @@ name: wbdsjunior-taponphone
 networks:
   wbdsjunior-taponphone:
 volumes:
+  wbdsjunior-taponphone-api-gateway-redis:
   wbdsjunior-taponphone-authentications-postgres:
   wbdsjunior-taponphone-markets-postgres:
   wbdsjunior-taponphone-payments-mongo:
@@ -16,13 +17,28 @@ services:
       no_cache: true
     image: wbdsjunior-taponphone-api-gateway:1
     environment:
+      - SPRING_DATA_REDIS_URL=redis://wbdsjunior-taponphone-api-gateway-redis:6379/0
       - SPRING_GATEWAY_TAPONPHONE_AUTHENTICATIONS_SERVICE_URI=http://wbdsjunior-taponphone-authentications:8080
       - SPRING_GATEWAY_TAPONPHONE_MARKETS_SERVICE_URI=http://wbdsjunior-taponphone-markets:8080
       - SPRING_GATEWAY_TAPONPHONE_PAYMETS_SERVICE_URI=http://wbdsjunior-taponphone-payments:8080
     ports:
       - 8080:8080
+    depends_on:
+      wbdsjunior-taponphone-api-gateway-redis:
+        condition: service_healthy
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
+  wbdsjunior-taponphone-api-gateway-redis:
+    extends:
+      file: ./docker-compose.base.yaml
+      service: base
+    image: redis:7-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - wbdsjunior-taponphone-api-gateway-redis:/data
+    healthcheck:
+      test: redis-cli ping | grep PONG || exit 1
+    restart: always
   wbdsjunior-taponphone-authentications:
     extends:
       file: ./docker-compose.base.yaml
@@ -43,7 +59,7 @@ services:
     extends:
       file: ./docker-compose.base.yaml
       service: base
-    image: postgres:15
+    image: postgres:16-alpine
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-authentications
@@ -73,7 +89,7 @@ services:
     extends:
       file: ./docker-compose.base.yaml
       service: base
-    image: postgres:15
+    image: postgres:16-alpine
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-markets
