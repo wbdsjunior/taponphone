@@ -24,6 +24,9 @@ server:
 spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:postgres@localhost:5432/taponphone-markets}
+  docker:
+    compose:
+      file: ../docker-compose.development.yaml
   flyway:
     sql-migration-prefix: postgresql-v-
   mvc:

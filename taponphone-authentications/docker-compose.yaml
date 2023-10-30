@@ -1,3 +1,4 @@
+version: '2.4'
 name: taponphone-authentications
 networks:
   taponphone-authentications:
@@ -5,15 +6,15 @@ volumes:
   taponphone-authentications-postgres:
 services:
   taponphone-authentications:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
-      dockerfile: ./Dockerfile
+      context: .
       no_cache: true
     image: taponphone-authentications:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATASOURCE_URL=jdbc:postgresql://taponphone-authentications-postgres:5432/taponphone-authentications?user=postgres&password=postgres
+    networks:
+      - taponphone-authentications
     ports:
       - 8080:8080
     depends_on:
@@ -22,13 +23,13 @@ services:
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   taponphone-authentications-postgres:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: postgres:16-alpine
     environment:
+      - TZ=America/Sao_Paulo
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-authentications
+    networks:
+      - taponphone-authentications
     volumes:
       - taponphone-authentications-postgres:/var/lib/postgresql
     healthcheck:

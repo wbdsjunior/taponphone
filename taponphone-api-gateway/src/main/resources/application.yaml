@@ -22,6 +22,9 @@ server:
       enabled: false
 
 spring:
+  docker:
+    compose:
+      file: ../docker-compose.development.yaml
   redis:
     url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379/0}
   cloud:

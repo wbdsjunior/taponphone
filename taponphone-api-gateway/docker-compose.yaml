@@ -1,3 +1,4 @@
+version: '2.4'
 name: taponphone-api-gateway
 networks:
   taponphone-api-gateway:
@@ -5,15 +6,15 @@ volumes:
   taponphone-api-gateway-redis:
 services:
   taponphone-api-gateway:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
-      dockerfile: ./Dockerfile
+      context: .
       no_cache: true
     image: taponphone-api-gateway:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATA_REDIS_URL=redis://taponphone-api-gateway-redis:6379/0
+    networks:
+      - taponphone-api-gateway
     ports:
       - 8080:8080
     depends_on:
@@ -22,11 +23,12 @@ services:
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   taponphone-api-gateway-redis:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: redis:7-alpine
+    environment:
+      - TZ=America/Sao_Paulo
     command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - taponphone-api-gateway
     volumes:
       - taponphone-api-gateway-redis:/data
     healthcheck:

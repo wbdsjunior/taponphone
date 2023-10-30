@@ -1,0 +1,14 @@
+FROM eclipse-temurin:21-jammy
+
+RUN groupadd --gid 1000 java \
+ && useradd --uid 1000 --gid java --shell /bin/bash --create-home java
+
+USER java
+
+WORKDIR /home/java/work
+
+ARG JAVA_OPTS
+
+ENV JAVA_OPTS=$JAVA_OPTS
+
+ENTRYPOINT ["./entrypoint.development.sh"]

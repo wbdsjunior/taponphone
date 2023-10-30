@@ -1,37 +1,47 @@
 version: '2.4'
-name: taponphone-payments
+name: payments
 networks:
-  taponphone-payments:
+  payments:
 volumes:
-  taponphone-payments-mongo:
+  mongo:
 services:
-  taponphone-payments:
+  payments:
     build:
       context: .
+      dockerfile: Dockerfile.development
+      args:
+        - JAVA_OPTS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000,quiet=y
       no_cache: true
-    image: taponphone-payments:1
+    image: payments:snapshot
     environment:
       - TZ=America/Sao_Paulo
-      - SPRING_DATA_MONGODB_URI=mongodb://taponphone-payments-mongo:27017/taponphone-payments
+      - SPRING_DATA_MONGODB_URI=mongodb://mongo:27017/payments
     networks:
-      - taponphone-payments
+      - payments
     ports:
+      - 8000:8000
       - 8080:8080
+    volumes:
+      - .:/home/java/work
     depends_on:
-      taponphone-payments-mongo:
+      mongo:
         condition: service_healthy
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
-  taponphone-payments-mongo:
+    labels:
+      org.springframework.boot.ignore: true
+  mongo:
     image: mongo:7
     environment:
       - TZ=America/Sao_Paulo
       - MONGO_INITDB_ROOT_USERNAME=mongo
       - MONGO_INITDB_ROOT_PASSWORD=mongo
     networks:
-      - taponphone-payments
+      - payments
     volumes:
-      - taponphone-payments-mongo:/data/db
+      - mongo:/data/db
     healthcheck:
       test: echo 'db.stats().ok' | mongosh -u mongo -p mongo --authenticationDatabase admin test --quiet
     restart: always
+    labels:
+      org.springframework.boot.readiness-check.tcp.disable: true

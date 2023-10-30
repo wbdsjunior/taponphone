@@ -1,3 +1,4 @@
+version: '2.4'
 name: wbdsjunior-taponphone
 networks:
   wbdsjunior-taponphone:
@@ -8,19 +9,18 @@ volumes:
   wbdsjunior-taponphone-payments-mongo:
 services:
   wbdsjunior-taponphone-api-gateway:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
       context: ./taponphone-api-gateway
-      dockerfile: ./Dockerfile
       no_cache: true
     image: wbdsjunior-taponphone-api-gateway:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATA_REDIS_URL=redis://wbdsjunior-taponphone-api-gateway-redis:6379/0
       - SPRING_GATEWAY_TAPONPHONE_AUTHENTICATIONS_SERVICE_URI=http://wbdsjunior-taponphone-authentications:8080
       - SPRING_GATEWAY_TAPONPHONE_MARKETS_SERVICE_URI=http://wbdsjunior-taponphone-markets:8080
       - SPRING_GATEWAY_TAPONPHONE_PAYMETS_SERVICE_URI=http://wbdsjunior-taponphone-payments:8080
+    networks:
+      - wbdsjunior-taponphone
     ports:
       - 8080:8080
     depends_on:
@@ -29,99 +29,97 @@ services:
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   wbdsjunior-taponphone-api-gateway-redis:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: redis:7-alpine
+    environment:
+      - TZ=America/Sao_Paulo
     command: redis-server --save 60 1 --loglevel warning
+    networks:
+      - wbdsjunior-taponphone
     volumes:
       - wbdsjunior-taponphone-api-gateway-redis:/data
     healthcheck:
       test: redis-cli ping | grep PONG || exit 1
     restart: always
   wbdsjunior-taponphone-authentications:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
       context: ./taponphone-authentications
-      dockerfile: ./Dockerfile
       no_cache: true
     image: wbdsjunior-taponphone-authentications:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATASOURCE_URL=jdbc:postgresql://wbdsjunior-taponphone-authentications-postgres:5432/taponphone-authentications?user=postgres&password=postgres
+    networks:
+      - wbdsjunior-taponphone
     depends_on:
       wbdsjunior-taponphone-authentications-postgres:
         condition: service_healthy
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   wbdsjunior-taponphone-authentications-postgres:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: postgres:16-alpine
     environment:
+      - TZ=America/Sao_Paulo
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-authentications
+    networks:
+      - wbdsjunior-taponphone
     volumes:
       - wbdsjunior-taponphone-authentications-postgres:/var/lib/postgresql
     healthcheck:
       test: pg_isready -U postgres
     restart: always
   wbdsjunior-taponphone-markets:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
       context: ./taponphone-markets
-      dockerfile: ./Dockerfile
       no_cache: true
     image: wbdsjunior-taponphone-markets:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATASOURCE_URL=jdbc:postgresql://wbdsjunior-taponphone-markets-postgres:5432/taponphone-markets?user=postgres&password=postgres
       - SPRING_FEIGNCLIENT_TAPONPHONE_PAYMENTS_SERVICE_URL=http://wbdsjunior-taponphone-payments:8080
+    networks:
+      - wbdsjunior-taponphone
     depends_on:
       wbdsjunior-taponphone-markets-postgres:
         condition: service_healthy
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   wbdsjunior-taponphone-markets-postgres:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: postgres:16-alpine
     environment:
+      - TZ=America/Sao_Paulo
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-markets
+    networks:
+      - wbdsjunior-taponphone
     volumes:
       - wbdsjunior-taponphone-markets-postgres:/var/lib/postgresql
     healthcheck:
       test: pg_isready -U postgres
     restart: always
   wbdsjunior-taponphone-payments:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
       context: ./taponphone-payments
-      dockerfile: ./Dockerfile
       no_cache: true
     image: wbdsjunior-taponphone-payments:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATA_MONGODB_URI=mongodb://wbdsjunior-taponphone-payments-mongo:27017/taponphone-payments
+    networks:
+      - wbdsjunior-taponphone
     depends_on:
       wbdsjunior-taponphone-payments-mongo:
         condition: service_healthy
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   wbdsjunior-taponphone-payments-mongo:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: mongo:7
     environment:
+      - TZ=America/Sao_Paulo
       - MONGO_INITDB_ROOT_USERNAME=mongo
       - MONGO_INITDB_ROOT_PASSWORD=mongo
+    networks:
+      - wbdsjunior-taponphone
     volumes:
       - wbdsjunior-taponphone-payments-mongo:/data/db
     healthcheck:

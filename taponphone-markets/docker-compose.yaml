@@ -1,3 +1,4 @@
+version: '2.4'
 name: taponphone-markets
 networks:
   taponphone-markets:
@@ -5,15 +6,15 @@ volumes:
   taponphone-markets-postgres:
 services:
   taponphone-markets:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     build:
-      dockerfile: ./Dockerfile
+      context: .
       no_cache: true
     image: taponphone-markets:1
     environment:
+      - TZ=America/Sao_Paulo
       - SPRING_DATASOURCE_URL=jdbc:postgresql://taponphone-markets-postgres:5432/taponphone-markets?user=postgres&password=postgres
+    networks:
+      - taponphone-markets
     ports:
       - 8080:8080
     depends_on:
@@ -22,13 +23,13 @@ services:
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
   taponphone-markets-postgres:
-    extends:
-      file: ./docker-compose.base.yaml
-      service: base
     image: postgres:16-alpine
     environment:
+      - TZ=America/Sao_Paulo
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=taponphone-markets
+    networks:
+      - taponphone-markets
     volumes:
       - taponphone-markets-postgres:/var/lib/postgresql
     healthcheck:
