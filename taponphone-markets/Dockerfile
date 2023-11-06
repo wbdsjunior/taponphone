@@ -13,6 +13,9 @@ COPY src/ ./src
 
 COPY entrypoint.sh mvnw pom.xml ./
 
+RUN ./mvnw verify \
+ && cp ./target/taponphone-markets-*.jar ~/taponphone-markets.jar
+
 ARG JAVA_OPTS
 
 ENV JAVA_OPTS=$JAVA_OPTS

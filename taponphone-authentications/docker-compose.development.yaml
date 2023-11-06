@@ -6,6 +6,8 @@ volumes:
   postgres:
 services:
   authentications:
+    labels:
+      org.springframework.boot.ignore: true
     build:
       context: .
       dockerfile: Dockerfile.development
@@ -15,6 +17,7 @@ services:
     image: authentications:snapshot
     environment:
       - TZ=America/Sao_Paulo
+      - SPRING_DISTRIBUTED_TRACING_ZIPKIN_ENDPONT=http://zipkin:9411/api/v2/spans
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/authentications?user=postgres&password=postgres
     networks:
       - authentications
@@ -24,12 +27,23 @@ services:
     volumes:
       - .:/home/java/work
     depends_on:
+      zipkin:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     healthcheck:
       test: curl --fail --silent http://localhost:8080/actuator/health/readiness | grep UP || exit 1
-    labels:
-      org.springframework.boot.ignore: true
+  zipkin:
+    image: openzipkin/zipkin:2
+    environment:
+      - TZ=America/Sao_Paulo
+      - STORAGE_TYPE=mem
+    networks:
+      - authentications
+    ports:
+      - 9411:9411
+    healthcheck:
+      test: wget http://localhost:9411/health -O - | sed ':a;N;$!ba;s/\s//g' | grep 'zipkin":{"status":"UP' || exit 1
   postgres:
     image: postgres:16-alpine
     environment:
@@ -43,5 +57,3 @@ services:
     healthcheck:
       test: pg_isready -U postgres
     restart: always
-    labels:
-      org.springframework.boot.readiness-check.tcp.disable: true

@@ -5,14 +5,13 @@ logging:
         security: DEBUG
 
 management:
-  datadog:
-    metrics:
-      export:
-        enabled: false
   endpoint:
     health:
       probes:
         enabled: true
+  zipkin:
+    tracing:
+      endpoint: ${SPRING_DISTRIBUTED_TRACING_ZIPKIN_ENDPONT:http://localhost:9411/api/v2/spans}
 
 server:
   error:
@@ -24,7 +23,7 @@ server:
 spring:
   docker:
     compose:
-      file: ../docker-compose.development.yaml
+      file: docker-compose.development.yaml
   redis:
     url: ${SPRING_DATA_REDIS_URL:redis://localhost:6379/0}
   cloud:

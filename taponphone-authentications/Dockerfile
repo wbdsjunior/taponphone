@@ -13,6 +13,9 @@ COPY src/ ./src
 
 COPY entrypoint.sh mvnw pom.xml ./
 
+RUN ./mvnw verify \
+ && cp ./target/taponphone-authentications-*.jar ~/taponphone-authentications.jar
+
 ARG JAVA_OPTS
 
 ENV JAVA_OPTS=$JAVA_OPTS
